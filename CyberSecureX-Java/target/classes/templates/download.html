@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Secure File Download - CyberSecureX</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Courier+Prime:wght@400;700&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      :root {
+        /* Cybersecurity Color Palette - Same as index.html */
+        --primary-bg: #0a0a0a;
+        --secondary-bg: #111111;
+        --card-bg: rgba(15, 15, 25, 0.9);
+        --accent-neon: #00ff41;
+        --accent-blue: #00d4ff;
+        --accent-purple: #8b5cf6;
+        --accent-red: #ff3366;
+        --accent-orange: #ff9800;
+        --accent-yellow: #ffd700;
+        --text-primary: #ffffff;
+        --text-secondary: #b0b0b0;
+        --text-muted: #707070;
+        --border-glow: rgba(0, 255, 65, 0.3);
+        --shadow-neon: 0 0 20px rgba(0, 255, 65, 0.2);
+        --grid-color: rgba(0, 255, 65, 0.1);
+      }
+
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: "Orbitron", "Courier Prime", monospace;
+        background: var(--primary-bg);
+        color: var(--text-primary);
+        min-height: 100vh;
+        padding: 24px;
+        overflow-x: hidden;
+        position: relative;
+      }
+
+      /* Animated Background Grid - Same as index.html */
+      body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-image: linear-gradient(
+            rgba(0, 255, 65, 0.03) 1px,
+            transparent 1px
+          ),
+          linear-gradient(90deg, rgba(0, 255, 65, 0.03) 1px, transparent 1px);
+        background-size: 50px 50px;
+        animation: gridMove 20s linear infinite;
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      @keyframes gridMove {
+        0% {
+          transform: translate(0, 0);
+        }
+        100% {
+          transform: translate(50px, 50px);
+        }
+      }
+
+      /* Floating particles effect - Same as index.html */
+      body::after {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(
+            2px 2px at 20px 30px,
+            var(--accent-neon),
+            transparent
+          ),
+          radial-gradient(2px 2px at 40px 70px, var(--accent-blue), transparent),
+          radial-gradient(
+            1px 1px at 90px 40px,
+            var(--accent-purple),
+            transparent
+          );
+        background-size: 200px 200px;
+        animation: float 15s ease-in-out infinite;
+        opacity: 0.1;
+        pointer-events: none;
+        z-index: -1;
+      }
+
+      @keyframes float {
+        0%,
+        100% {
+          transform: translateY(0px) rotate(0deg);
+        }
+        50% {
+          transform: translateY(-20px) rotate(180deg);
+        }
+      }
+
+      .download-container {
+        background: var(--card-bg);
+        padding: 32px 28px;
+        border-radius: 18px;
+        backdrop-filter: blur(16px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        max-width: 640px;
+        width: 100%;
+        margin: 24px auto;
+        text-align: center;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.35), 0 0 30px rgba(0, 255, 65, 0.12);
+        position: relative;
+        z-index: 1;
+        overflow: hidden;
+      }
+
+      .download-container::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 3px;
+        background: linear-gradient(
+          90deg,
+          var(--accent-neon),
+          var(--accent-blue),
+          var(--accent-purple)
+        );
+        animation: downloadBorder 4s ease-in-out infinite;
+      }
+
+      @keyframes downloadBorder {
+        0%,
+        100% {
+          opacity: 0.6;
+        }
+        50% {
+          opacity: 1;
+        }
+      }
+
+      .file-icon {
+        font-size: 80px;
+        margin-bottom: 25px;
+        text-shadow: 0 0 20px var(--accent-blue), 0 0 40px var(--accent-blue);
+        animation: iconPulse 3s ease-in-out infinite;
+      }
+
+      @keyframes iconPulse {
+        0%,
+        100% {
+          transform: scale(1);
+          text-shadow: 0 0 20px var(--accent-blue), 0 0 40px var(--accent-blue);
+        }
+        50% {
+          transform: scale(1.1);
+          text-shadow: 0 0 30px var(--accent-blue), 0 0 60px var(--accent-blue);
+        }
+      }
+
+      .download-container h1 {
+        font-family: "Orbitron", monospace;
+        font-size: 2.5rem;
+        font-weight: 900;
+        margin-bottom: 15px;
+        text-shadow: 0 0 1px var(--accent-blue), 0 0 2px var(--accent-blue),
+          0 0 3px var(--accent-blue);
+        background: linear-gradient(
+          135deg,
+          var(--accent-blue),
+          var(--accent-purple)
+        );
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        letter-spacing: 2px;
+      }
+
+      .download-container > p {
+        font-family: "Courier Prime", monospace;
+        color: var(--text-secondary);
+        margin-bottom: 30px;
+        font-size: 1.1rem;
+      }
+
+      .file-info {
+        margin: 25px 0;
+        padding: 30px 25px;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 15px;
+        text-align: left;
+        border: 1px solid rgba(0, 212, 255, 0.2);
+        backdrop-filter: blur(10px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2),
+          inset 0 0 20px rgba(0, 212, 255, 0.05);
+      }
+
+      .info-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin: 12px 0;
+        padding: 15px 0;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        font-family: "Courier Prime", monospace;
+        transition: all 0.3s ease;
+      }
+
+      .info-item:hover {
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 8px;
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .info-item:last-child {
+        border-bottom: none;
+      }
+
+      .info-item strong {
+        color: var(--accent-neon);
+        font-weight: 700;
+        text-shadow: 0 0 10px rgba(0, 212, 255, 0.3);
+      }
+
+      .info-item span {
+        color: var(--text-primary);
+        font-weight: 400;
+        word-break: break-word;
+        text-align: right;
+      }
+
+      .password-form {
+        margin: 30px 0;
+        display: flex;
+        flex-direction: column;
+        gap: 20px;
+      }
+
+      .password-form input {
+        width: 100%;
+        padding: 18px 20px;
+        border: 2px solid rgba(255, 215, 0, 0.3);
+        border-radius: 12px;
+        font-size: 16px;
+        font-family: "Courier Prime", monospace;
+        background: rgba(255, 255, 255, 0.05);
+        color: var(--text-primary);
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+      }
+
+      .password-form input:focus {
+        outline: none;
+        border-color: var(--accent-yellow);
+        box-shadow: 0 0 20px rgba(255, 215, 0, 0.3);
+        background: rgba(255, 255, 255, 0.1);
+      }
+
+      .password-form input::placeholder {
+        color: var(--text-muted);
+        font-style: italic;
+      }
+
+      .btn {
+        background: linear-gradient(135deg, var(--accent-neon), #00cc33);
+        color: var(--primary-bg);
+        padding: 18px 35px;
+        border: none;
+        border-radius: 12px;
+        font-size: 16px;
+        font-weight: 700;
+        font-family: "Orbitron", monospace;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 0 25px rgba(0, 255, 65, 0.4),
+          inset 0 0 20px rgba(255, 255, 255, 0.1);
+      }
+
+      .btn::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(
+          90deg,
+          transparent,
+          rgba(255, 255, 255, 0.2),
+          transparent
+        );
+        transition: left 0.5s ease;
+      }
+
+      .btn:hover::before {
+        left: 100%;
+      }
+
+      .btn:hover {
+        background: linear-gradient(135deg, #00ff41, var(--accent-blue));
+        transform: translateY(-3px);
+        box-shadow: 0 15px 35px rgba(0, 255, 65, 0.5),
+          0 0 40px rgba(0, 255, 65, 0.6),
+          inset 0 0 25px rgba(255, 255, 255, 0.2);
+      }
+
+      .btn:disabled {
+        background: rgba(102, 102, 102, 0.8);
+        cursor: not-allowed;
+        transform: none;
+        box-shadow: none;
+        color: var(--text-muted);
+      }
+
+      .error {
+        background: linear-gradient(
+          135deg,
+          rgba(255, 51, 102, 0.15),
+          rgba(183, 28, 28, 0.1)
+        );
+        border: 2px solid var(--accent-red);
+        padding: 25px;
+        border-radius: 15px;
+        margin: 25px 0;
+        box-shadow: 0 0 30px rgba(255, 51, 102, 0.3);
+        backdrop-filter: blur(10px);
+      }
+
+      .error h4 {
+        font-family: "Orbitron", monospace;
+        color: var(--accent-red);
+        margin-bottom: 10px;
+        text-shadow: 0 0 10px rgba(255, 51, 102, 0.5);
+      }
+
+      .error p {
+        font-family: "Courier Prime", monospace;
+        color: var(--text-secondary);
+      }
+
+      .success {
+        background: linear-gradient(
+          135deg,
+          rgba(0, 255, 65, 0.15),
+          rgba(0, 204, 51, 0.1)
+        );
+        border: 2px solid var(--accent-neon);
+        padding: 25px;
+        border-radius: 15px;
+        margin: 25px 0;
+        box-shadow: 0 0 30px rgba(0, 255, 65, 0.3);
+        backdrop-filter: blur(10px);
+        animation: successGlow 2s ease-in-out;
+      }
+
+      @keyframes successGlow {
+        0% {
+          transform: scale(0.9);
+          opacity: 0;
+        }
+        50% {
+          transform: scale(1.02);
+        }
+        100% {
+          transform: scale(1);
+          opacity: 1;
+        }
+      }
+
+      .success h4 {
+        font-family: "Orbitron", monospace;
+        color: var(--accent-neon);
+        margin-bottom: 10px;
+        text-shadow: 0 0 10px rgba(0, 255, 65, 0.5);
+      }
+
+      .success p {
+        font-family: "Courier Prime", monospace;
+        color: var(--text-secondary);
+      }
+
+      .loading {
+        display: none;
+        padding: 30px;
+      }
+
+      .loading p {
+        font-family: "Courier Prime", monospace;
+        color: var(--text-secondary);
+        font-size: 1.1rem;
+      }
+
+      .spinner {
+        border: 6px solid rgba(139, 92, 246, 0.2);
+        border-radius: 50%;
+        border-top: 6px solid var(--accent-purple);
+        width: 60px;
+        height: 60px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 25px;
+        box-shadow: 0 0 30px rgba(139, 92, 246, 0.4);
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+
+      /* Responsive Design */
+      @media (max-width: 768px) {
+        .download-container {
+          margin: 20px;
+          padding: 35px 25px;
+          max-width: calc(100vw - 40px);
+        }
+
+        .download-container h1 {
+          font-size: 2rem;
+        }
+
+        .file-icon {
+          font-size: 60px;
+        }
+
+        .info-item {
+          flex-direction: column;
+          align-items: flex-start;
+          gap: 8px;
+        }
+
+        .info-item span {
+          text-align: left;
+        }
+      }
+
+      /* Accessibility improvements */
+      @media (prefers-reduced-motion: reduce) {
+        *,
+        *::before,
+        *::after {
+          animation-duration: 0.01ms !important;
+          animation-iteration-count: 1 !important;
+          transition-duration: 0.01ms !important;
+        }
+      }
+
+      /* High contrast mode support */
+      @media (prefers-contrast: high) {
+        :root {
+          --text-primary: #ffffff;
+          --text-secondary: #ffffff;
+          --border-glow: #ffffff;
+        }
+      }
+
+      /* Security indicator */
+      .security-indicator {
+        position: absolute;
+        top: 15px;
+        right: 15px;
+        background: rgba(0, 255, 65, 0.1);
+        border: 1px solid rgba(0, 255, 65, 0.3);
+        padding: 8px 12px;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        font-family: "Orbitron", monospace;
+        color: var(--accent-neon);
+        text-shadow: 0 0 10px rgba(0, 255, 65, 0.3);
+      }
+
+      /* File type styling */
+      .file-type-indicator {
+        display: inline-block;
+        background: rgba(0, 212, 255, 0.2);
+        border: 1px solid rgba(0, 212, 255, 0.4);
+        padding: 4px 10px;
+        border-radius: 6px;
+        font-size: 0.9rem;
+        font-family: "Orbitron", monospace;
+        color: var(--accent-blue);
+        margin-left: 10px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="download-container">
+      <div class="security-indicator">🔒 SECURE</div>
+
+      <div class="file-icon">📁</div>
+      <h1>Secure File Download</h1>
+      <p>CyberSecureX File Sharing</p>
+
+      <div id="loadingDiv" class="loading">
+        <div class="spinner"></div>
+        <p>Loading file information...</p>
+      </div>
+
+      <div id="fileInfoDiv" style="display: none">
+        <!-- File info will be populated here -->
+      </div>
+
+      <div id="errorDiv" style="display: none" class="error">
+        <!-- Error message will be shown here -->
+      </div>
+    </div>
+
+    <script th:inline="javascript">
+      const shareToken = /*[[${shareToken}]]*/ "";
+      let fileInfo = null;
+
+      async function loadFileInfo() {
+        document.getElementById("loadingDiv").style.display = "block";
+
+        try {
+          const token = localStorage.getItem("authToken");
+          const response = await fetch(`/api/files/info/${shareToken}`, {
+            headers: token ? { "X-Auth-Token": token } : {},
+          });
+          const result = await response.json();
+
+          if (result.status === "success") {
+            fileInfo = result;
+            displayFileInfo(result);
+          } else {
+            showError(result.message);
+          }
+        } catch (error) {
+          showError("Failed to load file information: " + error.message);
+        } finally {
+          document.getElementById("loadingDiv").style.display = "none";
+        }
+      }
+
+      function displayFileInfo(info) {
+        const fileInfoDiv = document.getElementById("fileInfoDiv");
+
+        // Determine file type for better styling
+        const fileExtension = info.fileName.split(".").pop().toLowerCase();
+        const getFileTypeIcon = (ext) => {
+          const types = {
+            pdf: "📄",
+            doc: "📝",
+            docx: "📝",
+            txt: "📄",
+            jpg: "🖼️",
+            jpeg: "🖼️",
+            png: "🖼️",
+            gif: "🖼️",
+            mp4: "🎥",
+            avi: "🎥",
+            mov: "🎥",
+            mp3: "🎵",
+            wav: "🎵",
+            flac: "🎵",
+            zip: "📦",
+            rar: "📦",
+            "7z": "📦",
+            exe: "⚙️",
+            msi: "⚙️",
+          };
+          return types[ext] || "📁";
+        };
+
+        let html = `
+                <div class="file-info">
+                    <div class="info-item">
+                        <strong>📄 File Name:</strong>
+                        <span>${info.fileName} ${getFileTypeIcon(
+          fileExtension
+        )}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>📊 File Size:</strong>
+                        <span>${info.fileSize}</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>📅 Uploaded:</strong>
+                        <span>${new Date(
+                          info.uploadTime
+                        ).toLocaleString()}</span>
+                    </div>
+                    ${
+                      info.description
+                        ? `
+                            <div class="info-item">
+                                <strong>📝 Description:</strong>
+                                <span>${info.description}</span>
+                            </div>
+                        `
+                        : ""
+                    }
+                    ${
+                      info.maxDownloads > 0
+                        ? `
+                            <div class="info-item">
+                                <strong>📥 Downloads:</strong>
+                                <span id="downloadCount">${info.currentDownloads} / ${info.maxDownloads}</span>
+                            </div>
+                        `
+                        : ""
+                    }
+                    ${
+                      info.expiryTime
+                        ? `
+                            <div class="info-item">
+                                <strong>⏰ Expires:</strong>
+                                <span>${new Date(
+                                  info.expiryTime
+                                ).toLocaleString()}</span>
+                            </div>
+                        `
+                        : ""
+                    }
+                </div>
+            `;
+
+        if (info.hasPassword) {
+          html += `
+                    <div class="password-form">
+                        <input type="password" id="passwordInput" placeholder="🔑 Enter password to download" />
+                        <button class="btn" onclick="downloadFile()">🔓 Unlock & Download</button>
+                    </div>
+                `;
+        } else {
+          html +=
+            '<button class="btn" onclick="downloadFile()">📥 Download File</button>';
+        }
+
+        fileInfoDiv.innerHTML = html;
+        fileInfoDiv.style.display = "block";
+
+        // Add enter key support for password input
+        const passwordInput = document.getElementById("passwordInput");
+        if (passwordInput) {
+          passwordInput.addEventListener("keypress", function (e) {
+            if (e.key === "Enter") {
+              downloadFile();
+            }
+          });
+          passwordInput.focus();
+        }
+      }
+
+      async function downloadFile() {
+        const password = document.getElementById("passwordInput")?.value || "";
+        const downloadBtn = document.querySelector(".btn");
+
+        // Disable button and show loading state
+        downloadBtn.disabled = true;
+        downloadBtn.textContent = "📤 Downloading...";
+
+        try {
+          const formData = new FormData();
+          if (password) {
+            formData.append("password", password);
+          }
+
+          const headers = {};
+          const token = localStorage.getItem("authToken");
+          if (token) {
+            headers["X-Auth-Token"] = token;
+          }
+
+          const response = await fetch(`/api/files/download/${shareToken}`, {
+            method: "POST",
+            body: formData,
+            headers,
+          });
+
+          if (response.ok) {
+            // Get filename from response headers
+            const contentDisposition = response.headers.get(
+              "Content-Disposition"
+            );
+            let filename = fileInfo.fileName;
+            if (contentDisposition) {
+              const filenameMatch = contentDisposition.match(/filename="(.+)"/);
+              if (filenameMatch) {
+                filename = filenameMatch[1];
+              }
+            }
+
+            // Create download link
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement("a");
+            a.style.display = "none";
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+
+            showSuccess(
+              "File downloaded successfully! Check your downloads folder."
+            );
+
+            // Update download count in display if applicable
+            if (fileInfo.maxDownloads > 0) {
+              fileInfo.currentDownloads++;
+              const downloadSpan = document.getElementById("downloadCount");
+              if (downloadSpan) {
+                downloadSpan.textContent = `${fileInfo.currentDownloads} / ${fileInfo.maxDownloads}`;
+              }
+            }
+          } else {
+            const error = await response.text();
+            showError("Download failed: Invalid password or file unavailable");
+          }
+        } catch (error) {
+          showError("Download failed: " + error.message);
+        } finally {
+          // Re-enable button
+          downloadBtn.disabled = false;
+          downloadBtn.textContent = fileInfo.hasPassword
+            ? "🔓 Unlock & Download"
+            : "📥 Download File";
+        }
+      }
+
+      function showError(message) {
+        const errorDiv = document.getElementById("errorDiv");
+        errorDiv.innerHTML = "<h4>❌ Error</h4><p>" + message + "</p>";
+        errorDiv.style.display = "block";
+      }
+
+      function showSuccess(message) {
+        const successDiv = document.createElement("div");
+        successDiv.className = "success";
+        successDiv.innerHTML = "<h4>✅ Success</h4><p>" + message + "</p>";
+        document.querySelector(".download-container").appendChild(successDiv);
+
+        setTimeout(() => {
+          successDiv.remove();
+        }, 5000);
+      }
+
+      // Load file info on page load
+      loadFileInfo();
+    </script>
+  </body>
+</html>
